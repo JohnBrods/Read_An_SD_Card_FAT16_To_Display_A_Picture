@@ -2729,7 +2729,7 @@ char databufferstr[7];
 //  03h  |   8 Bytes | OEM Name
 //  0Bh  |   1 Word  | Bytes per Sector ------ Sector size in bytes
 //  0Dh  |   1 Byte  | Sectors per Cluster
-//  0Eh  |   1 Word  | Start sector for FAT1 also known as Reserved Sectors /////////////////////////////////////////////////////////////////
+//  0Eh  |   1 Word  | Start sector for FAT1 also known as Reserved Sectors
 //  10h  |   1 Byte  | Number of Copies of FAT
 //  11h  |   1 Word  | Number of Root Directory Entries 0x11 & 0x12    "Disk Parameter Block" (DPB).
 //  13h  |   1 Word  | Number of Sectors in Partition Smaller than 32MB
@@ -3431,8 +3431,6 @@ void main(){
       unsigned int Capture_End_Column = 799;
       unsigned char yy = 0;
       unsigned char savepower = 0;
-     // unsigned char value = 0;
-    //  char onlyonce4 = 1;
       unsigned long i = 0;
       unsigned long  jj = 0;
       unsigned int xposition = 10;
@@ -3473,6 +3471,7 @@ void main(){
       unsigned int Max_Bytes = 512;
       unsigned char loopa;
       unsigned char loop;
+      unsigned long youtubenumber = 0;
       SecondsColour = 14;
       secxpos = 700;
       secypos = 350;
@@ -3523,9 +3522,9 @@ void main(){
              Get_Boot_Information();        //does what it says
 
             Show_Boot_information();        //does what it says
-       //         loopa:
+
              Delay_ms(1000);
-        //  goto loopa;
+
 
             Sector = Root_Directory;
             Mmc_Read_Sector(Sector,databuffer);    //does what it says
@@ -3556,15 +3555,23 @@ void main(){
          Delay_ms(2000);
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
          Delay_ms(2000);*/
-
+         Location = 8; //Start At Root Directory 8
          ypos = 40;
 
+
         while (Found !=1){
-          if (databuffer[Location] != toupper('T')){// && databuffer[Location+1] !=toupper('E')){   Looks for first TXT file
+          if (databuffer[Location] !='T' && databuffer[Location+1] !='X' ){  //looking for txt file
 
-           Location +=8;
+           Location +=16;
+           
+           if (Location >512){
+            if (databuffer[Location] !='T'){    //no txt file here
+             Location = 8;//Reset Start At Root Directory 8
+             goto loopa;
+            }
+           }
 
-          if (databuffer[Location+1] == toupper('X')){
+          if (databuffer[Location+2] ==('T')){
             Found = 1;
             Write_Number(Location,350,ypos,Green);
             TFT_Write_Char(databuffer[Location],xpos,ypos);
@@ -3585,14 +3592,22 @@ void main(){
 
           Found = 0;
           databuffer[Location]=0;
+          databuffer[Location+1]=0;
           ypos = 70;
 
-        while (Found !=1){                                                            //Looks for second TXT File
-          if (databuffer[Location] != toupper('T')){
+         while (Found !=1){
+          if(databuffer[Location] !='T' && databuffer[Location+1] !='X' ){   //looking for txt file
 
-           Location +=8;
+           Location +=16;
+           
+            if (Location >512){
+            if (databuffer[Location] !='T'){    //no txt file here
+             Location = 8;  //Reset Start At Root Directory 8
+             goto loopa;
+            }
+           }
 
-          if (databuffer[Location+1] == toupper('X')){
+          if (databuffer[Location+2] ==('T')){
             Found = 1;
             Write_Number(Location,350,ypos,Green);
             TFT_Write_Char(databuffer[Location],xpos,ypos);
@@ -3610,23 +3625,24 @@ void main(){
            }
          }
         }
-
+        
+        loopa:
+        Write_Number(Location,500,ypos,White);  //Did The Location Reset To 8?
+         Delay_ms(2000);
          Found = 0;
          databuffer[Location]=0;
          ypos = 100;
 
          while (Found !=1){                                               //Looks for Bitmap
-          if (databuffer[Location] !=toupper('B')){
+          if (databuffer[Location] !='B' && databuffer[Location+1] !='M' ){       //  66 = B   77 = M    80 = P
+             Location = Location +16;
 
-           Location +=8;
-
-          if (databuffer[Location+1] ==toupper('M')){
+          if (databuffer[Location+2]==(80)){  // 80 = P
             Found = 1;
-            Write_Number(Location,350,ypos,Green);
+            Write_Number(Location,350,ypos,White);
             TFT_Write_Char(databuffer[Location],xpos,ypos);
             TFT_Write_Char(databuffer[Location+1],xpos*2,ypos);
             TFT_Write_Char(databuffer[Location+2],xpos*3,ypos);
-            TFT_Write_Char(databuffer[Location-9],xpos*4,ypos);
             TFT_Write_Char(databuffer[Location-8],xpos*5,ypos);
             TFT_Write_Char(databuffer[Location-7],xpos*6,ypos);
             TFT_Write_Char(databuffer[Location-6],xpos*7,ypos);
@@ -3635,11 +3651,10 @@ void main(){
             TFT_Write_Char(databuffer[Location-3],xpos*10,ypos);
             TFT_Write_Char(databuffer[Location-2],xpos*11,ypos);
             TFT_Write_Char(databuffer[Location-1],xpos*12,ypos);
-
            }
          }
         }
-               ypos = 130;                                                         //Calculate Time and date of BMP and Sector Start location
+            ypos = 130;                                                         //Calculate Time and date of BMP and Sector Start location
             Write_Number(databuffer[Location+15],17,ypos,White);
             Write_Number(databuffer[Location+14],100,ypos,White);
             Time_Data =(databuffer[Location+15]<<8) | databuffer[Location+14];
@@ -3684,7 +3699,7 @@ void main(){
 
           //  Delay_ms(1500);        //18744
 
-             loopa:
+          //   loopa:
              Delay_ms(2000);
          // goto loopa;
 
