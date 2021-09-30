@@ -3385,7 +3385,7 @@ void Set_Bus_Speeds(){
 
 void New_Screen(unsigned char yy){
 
-     TFT_Ext_Image(0,0,(0x00000138)+(768006)*yy ,1);   //reads res file
+    TFT_Ext_Image(0,0,(0x00000138)+(768006)*yy ,1);   //reads res file
 
     Delay_ms(50);
 
@@ -3393,7 +3393,7 @@ void New_Screen(unsigned char yy){
 
     Write_Screen_From_SRAM(0,799,0,479);
 
-     Small_Part_Screen_Capture(Small_Part_Capture_Start_Column,Part_Capture_End_Column,Part_Capture_Start_Row,Part_Capture_End_Row);
+    Small_Part_Screen_Capture(Small_Part_Capture_Start_Column,Part_Capture_End_Column,Part_Capture_Start_Row,Part_Capture_End_Row);
 
     Show_Time(yy);
 
@@ -3488,333 +3488,299 @@ void main(){
       Soft_I2C_Init();
       SRAM_CS = 1;
 
-    //  Set_I2C_Time_Battery_Backup(); // once
+      //Set_I2C_Time_Battery_Backup(); // once
       Adjust_Clock_Registers_Battery_Backup();  //once
       Get_I2C_Time_With_Battery_Backup();
 
       TFT_Set_Ext_Buffer(TFT_Get_Data);
-      //Delay_ms(20);
 
-       Clear_Screen_SSD1963(Blue);
+      Clear_Screen_SSD1963(Blue);
 
-    //  Delay_ms(200);
-    // TFT_Ext_Image(0,0,(0x003f698)+(768006)*yy ,1); //original pictures
-   //  TFT_Ext_Image(0,0,(0x00000138)+(768006)*yy ,1);
-    //  Delay_ms(60);
-     SRAM_Controller();
-     Set_DMA_Increment_EBI();
-                                         //READ TIMING ETC PAGE 81
-    // SRAM_Screen_Capture(Capture_Start_Column,Capture_End_Column,Capture_Start_Row,Capture_End_Row);
-    //  Delay_ms(40);
-   //  Write_Screen_From_SRAM(0,799,0,479);
-    // Small_Part_Screen_Capture(Small_Part_Capture_Start_Column,Part_Capture_End_Column,Part_Capture_Start_Row,Part_Capture_End_Row);
+      SRAM_Controller();
+      Set_DMA_Increment_EBI();
 
+      LATJ4_Bit = 1;   //MEMORY CHIP SELECT C/E - CHIP ENABLE INPUT  PIN 6 SRAM   EBICS0/RJ4
+      SRAM_CS = 1;
+      LATJ12_BIT = 0;  //LOW BYTE  L/B
+      LATJ10_BIT = 0;  //HIGH BYTE  U/B
+      LATC3_BIT = 1;   //WRITE PIN PMWR WRITE PIN ON PIC PIN 12 PIN 17 ON SRAM W/E
+      LATC4_BIT = 1;   //O/E MEMORY OUTPUT ENABLE PIN 41 PMRD PMP READ PIN 13 ON PIC  EBIOE/AN19/RPC4/PMRD/RC4
 
-        LATJ4_Bit = 1;   //MEMORY CHIP SELECT C/E - CHIP ENABLE INPUT  PIN 6 SRAM   EBICS0/RJ4
-        SRAM_CS = 1;
-        LATJ12_BIT = 0;  //LOW BYTE  L/B
-        LATJ10_BIT = 0;  //HIGH BYTE  U/B
-        LATC3_BIT = 1;   //WRITE PIN PMWR WRITE PIN ON PIC PIN 12 PIN 17 ON SRAM W/E
-        LATC4_BIT = 1;   //O/E MEMORY OUTPUT ENABLE PIN 41 PMRD PMP READ PIN 13 ON PIC  EBIOE/AN19/RPC4/PMRD/RC4
+      Show_Time(yy);
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      Get_Boot_Information();        //does what it says
 
-         Show_Time(yy);
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-             Get_Boot_Information();        //does what it says
+      Show_Boot_information();        //does what it says
 
-            Show_Boot_information();        //does what it says
+      Delay_ms(1000);
 
-             Delay_ms(1000);
+      Sector = Root_Directory;
+      Mmc_Read_Sector(Sector,dataBuffer);    //does what it says
+      Clear_Screen_SSD1963(Black);
 
+      TFT_Write_Char(dataBuffer[0],xpos,ypos);       //display sdcard name
+      TFT_Write_Char(dataBuffer[1],xpos*2,ypos);
+      TFT_Write_Char(dataBuffer[2],xpos*3,ypos);
+      TFT_Write_Char(dataBuffer[3],xpos*4,ypos);
+      TFT_Write_Char(dataBuffer[4],xpos*5,ypos);
+      TFT_Write_Char(dataBuffer[5],xpos*6,ypos);
+      TFT_Write_Char(dataBuffer[6],xpos*7,ypos);
+      TFT_Write_Char(dataBuffer[7],xpos*8,ypos);
+      TFT_Write_Char(dataBuffer[8],xpos*9,ypos);
+      //Delay_ms(2000);
 
-            Sector = Root_Directory;
-            Mmc_Read_Sector(Sector,databuffer);    //does what it says
-            Clear_Screen_SSD1963(Black);
-
-            TFT_Write_Char(databuffer[0],xpos,ypos);       //display sdcard name
-            TFT_Write_Char(databuffer[1],xpos*2,ypos);
-            TFT_Write_Char(databuffer[2],xpos*3,ypos);
-            TFT_Write_Char(databuffer[3],xpos*4,ypos);
-            TFT_Write_Char(databuffer[4],xpos*5,ypos);
-            TFT_Write_Char(databuffer[5],xpos*6,ypos);
-            TFT_Write_Char(databuffer[6],xpos*7,ypos);
-            TFT_Write_Char(databuffer[7],xpos*8,ypos);
-            TFT_Write_Char(databuffer[8],xpos*9,ypos);
-          //  Delay_ms(2000);
-
-        ////////////////////////////////////////////////////////Format fat16 below//////////////////////////////////////////////////////////////////////////
-        /*TFT_Fill_Screen(CL_RED);
-         TFT_Write_Text("GOING  TO  FORMAT !",80,150); //****************************
-         Delay_ms(2000);
-         TFT_Fill_Screen(CL_RED);
-         TFT_Write_Text("SWITCH  OFF  TO  SAVE  CARD !",50,150); //****************************
-         Delay_ms(2000);
-         Delay_ms(2000);
-         Mmc_Fat_QuickFormat("JB_CARD_1");
-         TFT_Fill_Screen(CL_Blue);
-         TFT_Write_Text("TOO LATE, CARD FORMATTED !",50,150); //****************************
-         Delay_ms(2000);
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-         Delay_ms(2000);*/
-         Location = 8; //Start At Root Directory 8
-         ypos = 40;
+      ////////////////////////////////////////////////////////Format fat16 below//////////////////////////////////////////////////////////////////////////
+      /*TFT_Fill_Screen(CL_RED);
+       TFT_Write_Text("GOING  TO  FORMAT !",80,150); //****************************
+       Delay_ms(2000);
+       TFT_Fill_Screen(CL_RED);
+       TFT_Write_Text("SWITCH  OFF  TO  SAVE  CARD !",50,150); //****************************
+       Delay_ms(2000);
+       Delay_ms(2000);
+       Mmc_Fat_QuickFormat("JB_CARD_1");
+       TFT_Fill_Screen(CL_Blue);
+       TFT_Write_Text("TOO LATE, CARD FORMATTED !",50,150); //****************************
+       Delay_ms(2000);
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       Delay_ms(2000);*/
+       Location = 8; //Start At Root Directory 8
+       ypos = 40;
 
 
         while (Found !=1){
-          if (databuffer[Location] !='T' && databuffer[Location+1] !='X' ){  //looking for txt file
+          if (dataBuffer[Location] !='T' && dataBuffer[Location+1] !='X' ){  //looking for txt file
 
            Location +=16;
            
            if (Location >512){
-            if (databuffer[Location] !='T'){    //no txt file here
+            if (dataBuffer[Location] !='T'){    //no txt file here
              Location = 8;//Reset Start At Root Directory 8
              goto loopa;
             }
            }
 
-          if (databuffer[Location+2] ==('T')){
+          if (dataBuffer[Location+2] ==('T')){
             Found = 1;
             Write_Number(Location,350,ypos,Green);
-            TFT_Write_Char(databuffer[Location],xpos,ypos);
-            TFT_Write_Char(databuffer[Location+1],xpos*2,ypos);
-            TFT_Write_Char(databuffer[Location+2],xpos*3,ypos);
-            TFT_Write_Char(databuffer[Location-9],xpos*4,ypos);
-            TFT_Write_Char(databuffer[Location-8],xpos*5,ypos);
-            TFT_Write_Char(databuffer[Location-7],xpos*6,ypos);
-            TFT_Write_Char(databuffer[Location-6],xpos*7,ypos);
-            TFT_Write_Char(databuffer[Location-5],xpos*8,ypos);
-            TFT_Write_Char(databuffer[Location-4],xpos*9,ypos);
-            TFT_Write_Char(databuffer[Location-3],xpos*10,ypos);
-            TFT_Write_Char(databuffer[Location-2],xpos*11,ypos);
-            TFT_Write_Char(databuffer[Location-1],xpos*12,ypos);
+            TFT_Write_Char(dataBuffer[Location],xpos,ypos);
+            TFT_Write_Char(dataBuffer[Location+1],xpos*2,ypos);
+            TFT_Write_Char(dataBuffer[Location+2],xpos*3,ypos);
+            TFT_Write_Char(dataBuffer[Location-9],xpos*4,ypos);
+            TFT_Write_Char(dataBuffer[Location-8],xpos*5,ypos);
+            TFT_Write_Char(dataBuffer[Location-7],xpos*6,ypos);
+            TFT_Write_Char(dataBuffer[Location-6],xpos*7,ypos);
+            TFT_Write_Char(dataBuffer[Location-5],xpos*8,ypos);
+            TFT_Write_Char(dataBuffer[Location-4],xpos*9,ypos);
+            TFT_Write_Char(dataBuffer[Location-3],xpos*10,ypos);
+            TFT_Write_Char(dataBuffer[Location-2],xpos*11,ypos);
+            TFT_Write_Char(dataBuffer[Location-1],xpos*12,ypos);
            }
          }
         }
 
           Found = 0;
-          databuffer[Location]=0;
-          databuffer[Location+1]=0;
+          dataBuffer[Location]=0;
+          dataBuffer[Location+1]=0;
           ypos = 70;
 
          while (Found !=1){
-          if(databuffer[Location] !='T' && databuffer[Location+1] !='X' ){   //looking for txt file
+          if(dataBuffer[Location] !='T' && dataBuffer[Location+1] !='X' ){   //looking for txt file
 
            Location +=16;
            
             if (Location >512){
-            if (databuffer[Location] !='T'){    //no txt file here
+            if (dataBuffer[Location] !='T'){    //no txt file here
              Location = 8;  //Reset Start At Root Directory 8
              goto loopa;
             }
            }
 
-          if (databuffer[Location+2] ==('T')){
+          if (dataBuffer[Location+2] ==('T')){
             Found = 1;
             Write_Number(Location,350,ypos,Green);
-            TFT_Write_Char(databuffer[Location],xpos,ypos);
-            TFT_Write_Char(databuffer[Location+1],xpos*2,ypos);
-            TFT_Write_Char(databuffer[Location+2],xpos*3,ypos);
-            TFT_Write_Char(databuffer[Location-9],xpos*4,ypos);
-            TFT_Write_Char(databuffer[Location-8],xpos*5,ypos);
-            TFT_Write_Char(databuffer[Location-7],xpos*6,ypos);
-            TFT_Write_Char(databuffer[Location-6],xpos*7,ypos);
-            TFT_Write_Char(databuffer[Location-5],xpos*8,ypos);
-            TFT_Write_Char(databuffer[Location-4],xpos*9,ypos);
-            TFT_Write_Char(databuffer[Location-3],xpos*10,ypos);
-            TFT_Write_Char(databuffer[Location-2],xpos*11,ypos);
-            TFT_Write_Char(databuffer[Location-1],xpos*12,ypos);
+            TFT_Write_Char(dataBuffer[Location],xpos,ypos);
+            TFT_Write_Char(dataBuffer[Location+1],xpos*2,ypos);
+            TFT_Write_Char(dataBuffer[Location+2],xpos*3,ypos);
+            TFT_Write_Char(dataBuffer[Location-9],xpos*4,ypos);
+            TFT_Write_Char(dataBuffer[Location-8],xpos*5,ypos);
+            TFT_Write_Char(dataBuffer[Location-7],xpos*6,ypos);
+            TFT_Write_Char(dataBuffer[Location-6],xpos*7,ypos);
+            TFT_Write_Char(dataBuffer[Location-5],xpos*8,ypos);
+            TFT_Write_Char(dataBuffer[Location-4],xpos*9,ypos);
+            TFT_Write_Char(dataBuffer[Location-3],xpos*10,ypos);
+            TFT_Write_Char(dataBuffer[Location-2],xpos*11,ypos);
+            TFT_Write_Char(dataBuffer[Location-1],xpos*12,ypos);
            }
          }
         }
         
         loopa:
         Write_Number(Location,500,ypos,White);  //Did The Location Reset To 8?
-         Delay_ms(2000);
-         Found = 0;
-         databuffer[Location]=0;
-         ypos = 100;
+        Delay_ms(2000);
+        Found = 0;
+        dataBuffer[Location]=0;
+        ypos = 100;
 
          while (Found !=1){                                               //Looks for Bitmap
-          if (databuffer[Location] !='B' && databuffer[Location+1] !='M' ){       //  66 = B   77 = M    80 = P
+          if (dataBuffer[Location] !='B' && dataBuffer[Location+1] !='M' ){       //  66 = B   77 = M    80 = P
              Location = Location +16;
 
-          if (databuffer[Location+2]==(80)){  // 80 = P
+          if (dataBuffer[Location+2]==(80)){  // 80 = P
             Found = 1;
             Write_Number(Location,350,ypos,White);
-            TFT_Write_Char(databuffer[Location],xpos,ypos);
-            TFT_Write_Char(databuffer[Location+1],xpos*2,ypos);
-            TFT_Write_Char(databuffer[Location+2],xpos*3,ypos);
-            TFT_Write_Char(databuffer[Location-8],xpos*5,ypos);
-            TFT_Write_Char(databuffer[Location-7],xpos*6,ypos);
-            TFT_Write_Char(databuffer[Location-6],xpos*7,ypos);
-            TFT_Write_Char(databuffer[Location-5],xpos*8,ypos);
-            TFT_Write_Char(databuffer[Location-4],xpos*9,ypos);
-            TFT_Write_Char(databuffer[Location-3],xpos*10,ypos);
-            TFT_Write_Char(databuffer[Location-2],xpos*11,ypos);
-            TFT_Write_Char(databuffer[Location-1],xpos*12,ypos);
+            TFT_Write_Char(dataBuffer[Location],xpos,ypos);
+            TFT_Write_Char(dataBuffer[Location+1],xpos*2,ypos);
+            TFT_Write_Char(dataBuffer[Location+2],xpos*3,ypos);
+            TFT_Write_Char(dataBuffer[Location-8],xpos*5,ypos);
+            TFT_Write_Char(dataBuffer[Location-7],xpos*6,ypos);
+            TFT_Write_Char(dataBuffer[Location-6],xpos*7,ypos);
+            TFT_Write_Char(dataBuffer[Location-5],xpos*8,ypos);
+            TFT_Write_Char(dataBuffer[Location-4],xpos*9,ypos);
+            TFT_Write_Char(dataBuffer[Location-3],xpos*10,ypos);
+            TFT_Write_Char(dataBuffer[Location-2],xpos*11,ypos);
+            TFT_Write_Char(dataBuffer[Location-1],xpos*12,ypos);
            }
          }
         }
-            ypos = 130;                                                         //Calculate Time and date of BMP and Sector Start location
-            Write_Number(databuffer[Location+15],17,ypos,White);
-            Write_Number(databuffer[Location+14],100,ypos,White);
-            Time_Data =(databuffer[Location+15]<<8) | databuffer[Location+14];
-            Write_Number(Time_Data, 350,ypos,Green);
-            Hour = Time_Data >>11;
-            Write_Number(Hour,500,ypos,Yellow);
-            Minute = Time_Data &(0x7E0);
-            Minute = Minute >>5;
-            Write_Number(Minute,570,ypos,Yellow);
-            ypos = 160;
-            Write_Number(databuffer[Location+17],17,ypos,White);
-            Write_Number(databuffer[Location+16],100,ypos,White);
-            Date_Data =(databuffer[Location+17]<<8) | databuffer[Location+16];
-            Write_Number(Date_data,350,ypos,Green);
-            Day = Date_data & 0b11111;
-            Write_Number(Day,500,ypos,Yellow);
-            Month = Date_data &0b111100000;
-            Month = Month >>5;
-            Write_Number (Month,570,ypos,Yellow);
-            Year = Date_data &0b1111111000000000;
-            Year = Year >>9;
-            Year = Year + 1980;
-            Write_Number(Year,615,ypos,Yellow);
-            ypos = 190;
-            Write_Number(databuffer[Location+19],17,ypos,White);
-            Write_Number(databuffer[Location+18],100,ypos,White);
-            Data_Start_Location_On_Card = databuffer[Location+19]<<8 | databuffer[Location+18];
-            Write_Number(Data_Start_Location_On_Card,350,ypos,Yellow);
-            Root_Directory_In_Bytes = Root_Directory *512;
-            Write_Number((Root_Directory_In_Bytes),385,ypos,Lime);
-            Number_of_Root_Directory_Entries = Number_of_Root_Directory_Entries *32; //32 Bytes per Entry.  FROM GET DATA
-            Write_Number(Number_of_Root_Directory_Entries,560,ypos,Magenta);
-            Sum = (Data_Start_Location_On_Card -2) *(64*512);
-            ypos = 225;
-            Write_Number(Sum,18,ypos,Red);
-            Root_Directory_In_Bytes = Root_Directory_In_Bytes + Number_of_Root_Directory_Entries;
-            Sum = Sum + Root_Directory_In_Bytes;
-            Write_Number(Sum,350,ypos,Violet);
-            ypos = 255;
-            Actual_Sector = Sum/512;
-            Write_Number(Actual_Sector,18,ypos,White); //omg we got there in the end
+        ypos = 130;                                                         //Calculate Time and date of BMP and Sector Start location
+        Write_Number(dataBuffer[Location+15],17,ypos,White);
+        Write_Number(dataBuffer[Location+14],100,ypos,White);
+        Time_Data =(dataBuffer[Location+15]<<8) | dataBuffer[Location+14];
+        Write_Number(Time_Data, 350,ypos,Green);
+        Hour = Time_Data >>11;
+        Write_Number(Hour,500,ypos,Yellow);
+        Minute = Time_Data &(0x7E0);
+        Minute = Minute >>5;
+        Write_Number(Minute,570,ypos,Yellow);
+        ypos = 160;
+        Write_Number(dataBuffer[Location+17],17,ypos,White);
+        Write_Number(dataBuffer[Location+16],100,ypos,White);
+        Date_Data =(dataBuffer[Location+17]<<8) | dataBuffer[Location+16];
+        Write_Number(Date_data,350,ypos,Green);
+        Day = Date_data & 0b11111;
+        Write_Number(Day,500,ypos,Yellow);
+        Month = Date_data &0b111100000;
+        Month = Month >>5;
+        Write_Number (Month,570,ypos,Yellow);
+        Year = Date_data &0b1111111000000000;
+        Year = Year >>9;
+        Year = Year + 1980;
+        Write_Number(Year,615,ypos,Yellow);
+        ypos = 190;
+        Write_Number(dataBuffer[Location+19],17,ypos,White);
+        Write_Number(dataBuffer[Location+18],100,ypos,White);
+        Data_Start_Location_On_Card = dataBuffer[Location+19]<<8 | dataBuffer[Location+18];
+        Write_Number(Data_Start_Location_On_Card,350,ypos,Yellow);
+        Root_Directory_In_Bytes = Root_Directory *512;
+        Write_Number((Root_Directory_In_Bytes),385,ypos,Lime);
+        Number_of_Root_Directory_Entries = Number_of_Root_Directory_Entries *32; //32 Bytes per Entry.  FROM GET DATA
+        Write_Number(Number_of_Root_Directory_Entries,560,ypos,Magenta);
+        Sum = (Data_Start_Location_On_Card -2) *(64*512);
+        ypos = 225;
+        Write_Number(Sum,18,ypos,Red);
+        Root_Directory_In_Bytes = Root_Directory_In_Bytes + Number_of_Root_Directory_Entries;
+        Sum = Sum + Root_Directory_In_Bytes;
+        Write_Number(Sum,350,ypos,Violet);
+        ypos = 255;
+        Actual_Sector = Sum/512;
+        Write_Number(Actual_Sector,18,ypos,White); //omg we got there in the end
 
-          //  Delay_ms(1500);        //18744
-
-          //   loopa:
-             Delay_ms(2000);
-         // goto loopa;
-
-
-
+        Delay_ms(2000);
         ypos = 30;
 
-     Mmc_Read_Sector(Actual_Sector,databuffer);               //Actual Sector where picture starts, not the same as start of file.
-     if (databuffer[0] == toupper('B')){
-     if (databuffer[1] == toupper('M')){
+         Mmc_Read_Sector(Actual_Sector,dataBuffer);               //Actual Sector where picture starts, not the same as start of file.
+         if (dataBuffer[0] == toupper('B')){
+         if (dataBuffer[1] == toupper('M')){
 
-       Clear_Screen_SSD1963(Black);
+           Clear_Screen_SSD1963(Black);
 
-     }}else { Clear_Screen_SSD1963(Red);}
+         }}else { Clear_Screen_SSD1963(Red);}
 
-
-          loop:
-        //Size_Of_File = (dataBuffer[2]) |  (dataBuffer[3]<<8) |  (dataBuffer[4]<<16) |  (dataBuffer[5]<<24);
         Byte2 = dataBuffer[2];
         Byte3 = dataBuffer[3];
-        Byte3 = byte3<<8;
+        Byte3 = Byte3<<8;
         Byte4 = dataBuffer[4];
-        Byte4 = byte4<<16;
+        Byte4 = Byte4<<16;
         Byte5 = dataBuffer[5];
-        Byte5 = byte5<<24;
+        Byte5 = Byte5<<24;
 
         Size_Of_File = Byte5 + Byte4 + Byte3 + Byte2;          //Does what it says
-     //   Write_Number(Size_Of_File,xpos,ypos,Yellow);
 
-        //Image_Data_Starts_At (dataBuffer[10]) |  (dataBuffer[11]<<8) |  (dataBuffer[12]<<16) |  (dataBuffer[13]<<24);
         Byte10 = dataBuffer[10];
         Byte11 = dataBuffer[11];
-        Byte11 = byte11<<8;
+        Byte11 = Byte11<<8;
         Byte12 = dataBuffer[12];
-        Byte12 = byte12<<16;
+        Byte12 = Byte12<<16;
         Byte13 = dataBuffer[13];
-        Byte13 = byte13<<24;
+        Byte13 = Byte13<<24;
 
-        Image_Data_Starts_At = byte13 + byte12 + byte11 + byte10;  //  Does what it says
-      //  Write_Number(Image_Data_Starts_At,xpos+200,ypos,Green);
+        Image_Data_Starts_At = Byte13 + Byte12 + Byte11 + Byte10;  //  Does what it says
+        //Write_Number(Image_Data_Starts_At,xpos+200,ypos,Green);
 
-        //Image_Width (dataBuffer[18]) |  (dataBuffer[19]<<8)
         Byte18 = dataBuffer[18];
         Byte19 = dataBuffer[19];
-        Byte19 =  Byte19<<8;
+        Byte19 = Byte19<<8;
 
-          ypos = 60;
+        ypos = 60;
         Image_Width = Byte19 + Byte18;
-      //  Write_Number(Image_Width,xpos,ypos,Yellow);
+        //  Write_Number(Image_Width,xpos,ypos,Yellow);
+        End_Column = Image_Width-1;
 
-       End_Column = Image_Width-1;
+        Size_Of_File = Size_Of_File;// + Image_Data_Starts_At;
 
-               Size_Of_File = Size_Of_File;// + Image_Data_Starts_At;
+        Sectors_To_Read = Size_Of_File / 512;
+        Bytes_Left_To_Read  = Size_Of_File %512;
 
-              Sectors_To_Read = Size_Of_File / 512;
-              Bytes_Left_To_Read  = Size_Of_File %512;
+        if (Bytes_Left_To_Read>0){
+         Sectors_To_Read +=1;  //   Sectors_To_Read = Sectors_To_Read+1;
+        }
 
-              if (Bytes_Left_To_Read>0){
-               Sectors_To_Read +=1;  //   Sectors_To_Read = Sectors_To_Read+1;
-              }
+        ypos=90;
 
-           ypos=90;
-
-         Write_Number(Sectors_To_Read,xpos,ypos,White);
-         Write_Number(Bytes_Left_To_Read,xpos+500,ypos,Green);
+        Write_Number(Sectors_To_Read,xpos,ypos,White);
+        Write_Number(Bytes_Left_To_Read,xpos+500,ypos,Green);
         // Delay_ms(1000);
-    // goto loop;
+
 
        TFT_CS = 0;
-  //  Write_Command_SSD1963(0x36);
-  //  Write_Data_SSD1963(128);            INVERT IF YOU FORGOT TO FLIP IMAGE
+       //Write_Command_SSD1963(0x36);
+       //Write_Data_SSD1963(128);            INVERT IF YOU FORGOT TO FLIP IMAGE
 
-     Write_Command_SSD1963(0x2A);           //: Set Start Column               D/C = 0;
-     Write_Data_SSD1963(Start_column>>8);   //: Start Column Number High Byte  D/C = 1;
-     Write_Data_SSD1963(Start_column);      //: Start Column Number Low Byte   D/C = 1;
-     Write_Data_SSD1963(End_Column>>8);     //: End Column Number High Byte    D/C = 1;
-     Write_Data_SSD1963(End_Column);        //: End Column Number Low Byte     D/C = 1;
+       Write_Command_SSD1963(0x2A);           //: Set Start Column               D/C = 0;
+       Write_Data_SSD1963(Start_column>>8);   //: Start Column Number High Byte  D/C = 1;
+       Write_Data_SSD1963(Start_column);      //: Start Column Number Low Byte   D/C = 1;
+       Write_Data_SSD1963(End_Column>>8);     //: End Column Number High Byte    D/C = 1;
+       Write_Data_SSD1963(End_Column);        //: End Column Number Low Byte     D/C = 1;
 
-     Write_Command_SSD1963(0x2B);           //: SET ROW ADDRESS                D/C = 0;
-     Write_Data_SSD1963(Start_Row>>8);      //: Start Row Number High Byte     D/C = 1;
-     Write_Data_SSD1963(Start_Row);         //: Start Row Number Low Byte      D/C = 1;
-     Write_Data_SSD1963(End_Row>>8);        //: End Row Number High Byte       D/C = 1;
-     Write_Data_SSD1963(End_Row);           //: End Row Number Low Byte        D/C = 1;
+       Write_Command_SSD1963(0x2B);           //: SET ROW ADDRESS                D/C = 0;
+       Write_Data_SSD1963(Start_Row>>8);      //: Start Row Number High Byte     D/C = 1;
+       Write_Data_SSD1963(Start_Row);         //: Start Row Number Low Byte      D/C = 1;
+       Write_Data_SSD1963(End_Row>>8);        //: End Row Number High Byte       D/C = 1;
+       Write_Data_SSD1963(End_Row);           //: End Row Number Low Byte        D/C = 1;
 
-     Write_Command_SSD1963(0x2C);   // Write Memory Start, 0x2C
+       Write_Command_SSD1963(0x2C);   // Write Memory Start, 0x2C
 
 
  while(Complete !=1){                   //Copy Bitmap to screen By John B 26th September 2021
 
-              // TFT_CS = 0;
 
-               for (i=0; i<Sectors_To_Read; i++){
-               Mmc_Read_Sector(Actual_Sector,databuffer);
-               for (x = Image_Data_Starts_At; x<Max_Bytes; x=x+2){
-               Data_Out = databuffer[x] | databuffer[x+1]<<8;
-               Write_Data_SSD1963(Data_Out);
-               }
+         for (i=0; i<Sectors_To_Read; i++){
+         Mmc_Read_Sector(Actual_Sector,dataBuffer);
+         for (x = Image_Data_Starts_At; x<Max_Bytes; x=x+2){
+         Data_Out = dataBuffer[x] | dataBuffer[x+1]<<8;
+         Write_Data_SSD1963(Data_Out);
+         }
+           Actual_Sector++;
+           Image_Data_Starts_At = 0;
 
-                 Actual_Sector++;
-                 Image_Data_Starts_At = 0;
+           if (i==Sectors_To_Read-1){           //   if (i==Sectors_To_Read + Actual_Sector){
+            Max_Bytes = Bytes_Left_To_Read;
+            Complete = 1;
+           }
+         }
 
-                 if (i==Sectors_To_Read-1){           //   if (i==Sectors_To_Read + Actual_Sector){
-                  Max_Bytes = Bytes_Left_To_Read;
-                  Complete = 1;
-                 }
-
-
-               }
-             // SRAM_Screen_Capture(Capture_Start_Column,Image_Width,Capture_Start_Row,271);
-              SRAM_Screen_Capture(Capture_Start_Column,Capture_End_Column,Capture_Start_Row,Capture_End_Row);
-              Small_Part_Screen_Capture(Small_Part_Capture_Start_Column,Part_Capture_End_Column,Part_Capture_Start_Row,Part_Capture_End_Row);
-             // Write_Number(Max_Bytes,30,30,White);
-             // Write_Number(i,30,60,White);
-             //  Delay_ms(500);
-              End_Column = Image_Width;
+          //SRAM_Screen_Capture(Capture_Start_Column,Capture_End_Column,Capture_Start_Row,Capture_End_Row);
+          Small_Part_Screen_Capture(Small_Part_Capture_Start_Column,Part_Capture_End_Column,Part_Capture_Start_Row,Part_Capture_End_Row);
 
   }
 
@@ -3822,53 +3788,48 @@ void main(){
 
   while(1){
 
+          if (RA14_Bit & once){
+          Once = 0;
+          LATA1_bit = 0;
+          TFT_Set_Font(Academy_Engraved_LET121x183_Regular,CL_BLACK,FO_HORIZONTAL);
+          TFT_Write_text(":",376,122);
+          }
 
+          if (RA14_bit !=1 && !Once){
+           Once = 1;
+           Get_I2C_Time_With_Battery_Backup();
+           TFT_Set_Font(Academy_Engraved_LET121x183_Regular,CL_WHITE,FO_HORIZONTAL);
+           TFT_Write_text(":",376,122);
+           LATA1_bit = 1;
+          }
 
-                  if (RA14_Bit & once){
-                  Once = 0;
-                  LATA1_bit = 0;
-                  TFT_Set_Font(Academy_Engraved_LET121x183_Regular,CL_BLACK,FO_HORIZONTAL);
-                  TFT_Write_text(":",376,122);
-                  }
+          if(seconds==0 && onlyonce){
+             onlyonce = 0;
+             Show_Time(yy);
+           }
 
-                  if (RA14_bit !=1 && !Once){
-                   Once = 1;
-                   Get_I2C_Time_With_Battery_Backup();
-                   TFT_Set_Font(Academy_Engraved_LET121x183_Regular,CL_WHITE,FO_HORIZONTAL);
-                   TFT_Write_text(":",376,122);
-                   LATA1_bit = 1;
-                  }
+         if (minutes==0 && seconds ==3 && onlyonce2){
+           onlyonce2 = 0;
+            yy++;
+           if (yy>11){
+            yy = 0; }
+           New_Screen(yy);
+          }
 
+          if (hours==1 && savepower !=1){
+          TFT_Set_DBC_SSD1963_BACKLIGHT(35);
+          savepower = 1;
+          }
 
+          if (hours==8 && savepower){
+          TFT_Set_DBC_SSD1963_BACKLIGHT(215);
+          savepower = 0;
+          }
 
-               if(seconds==0 && onlyonce){
-                   onlyonce = 0;
-                   Show_Time(yy);
-                }
-
-
-              if (minutes==0 && seconds ==3 && onlyonce2){
-                 onlyonce2 = 0;
-                  yy++;
-                 if (yy>11){
-                  yy = 0; }
-                 New_Screen(yy);
-                }
-
-                if (hours==1 && savepower !=1){
-                TFT_Set_DBC_SSD1963_BACKLIGHT(35);
-                savepower = 1;
-                }
-
-                if (hours==8 && savepower){
-                TFT_Set_DBC_SSD1963_BACKLIGHT(215);
-                savepower = 0;
-                }
-
-             if (seconds%10 ==1){
-                onlyonce2 = 1;
-                onlyonce = 1;
-               }
+         if (seconds%10 ==1){
+          onlyonce2 = 1;
+          onlyonce = 1;
+          }
 
 
    if (secondsvalid && RA14_Bit){
